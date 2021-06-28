@@ -124,3 +124,92 @@ FROM health.user_logs;
 
 ```
 
+## Count
+
+Unique Coloumn count
+
+```bash
+  count(DISTINCT id)
+  count(*)
+```
+
+## Percentage
+
+Perceentage Calculation
+
+```bash
+ select
+  id,
+  count(*) as Frequency,
+  round(
+    100 * count(*) :: Numeric / Sum(count(*)) over(),
+    2
+  )
+FROM
+  health.user_logs
+group by
+  id
+order by
+  Frequency Desc
+limit
+  10;
+```
+## Duplicate DISTINCT Record Count by SubQuery
+
+```bash
+  Select count(*) from (select Distinct * from health.user_logs) as Distinct_frequency;
+
+```
+## Duplicate record Count With With clause
+
+
+```bash
+  With Duplicate_log as(
+  Select
+    distinct *
+  from
+    health.user_logs
+)
+select
+  count(*)
+from
+  Duplicate_log;
+```
+## Creating Temporary Table with Deduplicated Records
+Temporary tables are automagically deleted once a session is shut down
+```bash
+  Create TEMP Table Duplicated_user_log as
+select
+  Distinct *
+from
+  health.user_logs;
+```
+## Frequency Count of Duplicate Entry
+
+```bash
+  WITH groupby_counts AS (
+  SELECT
+    id,
+    log_date,
+    measure,
+    measure_value,
+    systolic,
+    diastolic,
+    COUNT(*) AS frequency
+  FROM health.user_logs
+  GROUP BY
+    id,
+    log_date,
+    measure,
+    measure_value,
+    systolic,
+    diastolic
+)
+SELECT *
+FROM groupby_counts
+WHERE frequency > 1
+ORDER BY frequency DESC
+limit 10;
+```
+
+  
